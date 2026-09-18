@@ -28,7 +28,6 @@ func NewGradeBook(logger *slog.Logger) *GradeBook {
 	}
 }
 
-
 func (g *GradeBook) AddStudent(name string) (student.UUID, error) {
 	s, err := student.NewStudent(name)
 	if err != nil {

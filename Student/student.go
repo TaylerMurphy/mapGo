@@ -31,10 +31,10 @@ type GradeRecord struct {
 }
 
 type Student struct {
-	ID         UUID          // id, по которому студент хранится в журнале
-	FullName   string        // ФИО
-	Grades     []GradeRecord // оценки с датами
-	EnterDate  time.Time     // дата зачисления
+	ID         UUID
+	FullName   string
+	Grades     []GradeRecord
+	EnterDate  time.Time
 	CourseYear uint8
 	AVG        float64
 	Flags      StatusFlags
@@ -50,8 +50,8 @@ func GenerateUUID() (UUID, error) {
 	if _, err := rand.Read(id[:]); err != nil {
 		return UUID{}, ErrorGeneratingUUID
 	}
-	id[6] = (id[6] & 0x0f) | 0x40 // version 4
-	id[8] = (id[8] & 0x3f) | 0x80 // variant 10
+	id[6] = (id[6] & 0x0f) | 0x40
+	id[8] = (id[8] & 0x3f) | 0x80
 	return id, nil
 }
 
@@ -74,7 +74,7 @@ func NewStudent(name string) (*Student, error) {
 		AVG:        0,
 		EnterDate:  time.Now().UTC(),
 		CourseYear: 1,
-		Flags:      FlagActive, // по умолчанию активен
+		Flags:      FlagActive,
 	}, nil
 }
 
@@ -91,6 +91,54 @@ func (s *Student) Average() float64 {
 	return float64(sum) / float64(len(s.Grades))
 }
 
+func (s *Student) setFlag(f StatusFlags, v bool) {
+	if v {
+		s.Flags |= f
+	} else {
+		s.Flags &^= f
+	}
+}
+
+func (s *Student) hasFlag(f StatusFlags) bool {
+	return s.Flags&f != 0
+}
+
+func (s *Student) SetActive(v bool) {
+	s.setFlag(FlagActive, v)
+}
+
+func (s *Student) SetHonors(v bool) {
+	s.setFlag(FlagHonors, v)
+}
+
+func (s *Student) SetFinancialDebt(v bool) {
+	s.setFlag(FlagAcademicDebt, v)
+}
+
+func (s *Student) SetAcademicDebt(v bool) {
+	s.setFlag(FlagAcademicDebt, v)
+}
+
+func (s *Student) SetNonResident(v bool) {
+	s.setFlag(FlagNonResident, v)
+}
+
 func (s *Student) IsActive() bool {
-	return s.Flags&FlagActive != 0
+	return s.hasFlag(FlagActive)
+}
+
+func (s *Student) IsHonor() bool {
+	return s.hasFlag(FlagHonors)
+}
+
+func (s *Student) IsFinancialDebt() bool {
+	return s.hasFlag(FlagFinancialDebt)
+}
+
+func (s *Student) IsAcatemicDebt() bool {
+	return s.hasFlag(FlagAcademicDebt)
+}
+
+func (s *Student) IsNonResident() bool {
+	return s.hasFlag(FlagNonResident)
 }
